@@ -1,4 +1,22 @@
 from utils import getBoundary
+import glob.glob
+import numpy as np
+
+def _single_case(image, mask, density=0.1):
+    boundary = getBoundary(mask)
+    one_voxels = np.where(boundary==1)
+    boundary_voxel_index_list = list(zip(one_voxels[0],one_voxels[1],one_voxels[2]))
+    num_points = len(boundary_voxel_index_list)
+
+    single_image_res = np.zeros((2,num_points))
+    for i in range(num_points):
+        x,y,z = boundary_voxel_index_list[i]
+        X = image[x,y,z]
+        Y = mask[x,y,z]
+        single_image_res[i,0] = X
+        single_image_res[i,1] = Y
+    
+    return single_image_res
 
 def preprocess(density=0.1, output="./data/points_train/points.npy"):
     '''
@@ -9,10 +27,16 @@ def preprocess(density=0.1, output="./data/points_train/points.npy"):
     '''
     dir_img = "./data/images/"
     dir_mask = "./data/labels"
-    dir_out = output
-    
 
-    getBoundary()
+    print("We got {} cases".format(num_cases))
+    # assume we got all the results
+    res_list = []
+    res = np.concatenate(res_list, axis=1)
+    num_points = len(res[0])
+    print("We processed {} points".format(num_points))
+    np.save(output,res)
+    
+    
 
 def get_args():
     parser = argparse.ArgumentParser(description='Pre-process to prepare the dataset for the pointrender to train',
